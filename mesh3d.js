@@ -278,10 +278,10 @@ FFBOMesh3D.prototype.addJson = function(json) {
 		}
 	}
 	if ( isNAData ) {
-		this.meshGroup.visible = true;
-		this.controls.target0.x = 0.5*(this.boundingBox.minX + this.boundingBox.maxX );
-		this.controls.target0.y = 0.5*(this.boundingBox.minY + this.boundingBox.maxY );
-		this.controls.reset();
+		//this.meshGroup.visible = true;
+		//this.controls.target0.x = 0.5*(this.boundingBox.minX + this.boundingBox.maxX );
+		//this.controls.target0.y = 0.5*(this.boundingBox.minY + this.boundingBox.maxY );
+		//this.controls.reset();
 	}
 }
 
@@ -518,6 +518,9 @@ FFBOMesh3D.prototype.initTimeliner = function() {
 FFBOMesh3D.prototype.onDocumentMouseClick = function( event ) {
 	if (event !== undefined)
 		event.preventDefault();
+
+	if (!this.controls.checkStateIsNone())
+		return;
 
 	this.raycaster.setFromCamera( this.mouse, this.camera );
 
@@ -837,14 +840,18 @@ FFBOMesh3D.prototype.setColor = function( id, color ) {
 			continue;
 		var meshobj = this.meshDict[id[i]].object;
 		for (var j = 0; j < meshobj.children.length; ++j ) {
-			meshobj.children[j].material.color.set( color );
-			meshobj.children[j].geometry.colorsNeedUpdate = true;
+		    meshobj.children[j].material.color.set( color );
+		    meshobj.children[j].geometry.colorsNeedUpdate = true;
+		    for(var k = 0; k < meshobj.children[j].geometry.colors.length; ++k){
+			meshobj.children[j].geometry.colors[k].set( color );
+		    }
 		}
 	}
 }
 
 FFBOMesh3D.prototype.resetView = function() {
-
+        this.controls.target0.x = 0.5*(this.boundingBox.minX + this.boundingBox.maxX );
+	this.controls.target0.y = 0.5*(this.boundingBox.minY + this.boundingBox.maxY );
 	this.controls.reset();
 }
 
