@@ -635,29 +635,31 @@ FFBOMesh3D.prototype.render = function() {
 	/*
 	 * show label of mesh object when it intersects with cursor
 	 */
-	this.raycaster.setFromCamera( this.mouse, this.camera );
+	if (this.controls.checkStateIsNone()) {
+		this.raycaster.setFromCamera( this.mouse, this.camera );
 
-	var intersects = this.raycaster.intersectObjects( this.meshGroup.children, true);
-	if ( intersects.length > 0 ) {
-		this.currentIntersected = intersects[0].object.parent;
-		/* find first object that can be highlighted (skip  mesh) */
-		for (var i = 1; i < intersects.length; i++ ) {
-			var x = intersects[i].object.parent;
-			if (this.meshDict[x.uid]['highlight']) {
-				this.currentIntersected = x;
-				break;
+		var intersects = this.raycaster.intersectObjects( this.meshGroup.children, true);
+		if ( intersects.length > 0 ) {
+			this.currentIntersected = intersects[0].object.parent;
+			/* find first object that can be highlighted (skip  mesh) */
+			for (var i = 1; i < intersects.length; i++ ) {
+				var x = intersects[i].object.parent;
+				if (this.meshDict[x.uid]['highlight']) {
+					this.currentIntersected = x;
+					break;
+				}
 			}
+			if ( this.currentIntersected !== undefined ) {
+				this.show3dToolTip(this.currentIntersected.name);
+				this.highlight(this.currentIntersected.uid);
+			}
+		} else {
+			if ( this.currentIntersected !== undefined ) {
+				this.hide3dToolTip();
+				this.resume();
+			}
+			this.currentIntersected = undefined;
 		}
-		if ( this.currentIntersected !== undefined ) {
-			this.show3dToolTip(this.currentIntersected.name);
-			this.highlight(this.currentIntersected.uid);
-		}
-	} else {
-		if ( this.currentIntersected !== undefined ) {
-			this.hide3dToolTip();
-			this.resume();
-		}
-		this.currentIntersected = undefined;
 	}
 
 	this.renderer.render( this.scene, this.camera );
