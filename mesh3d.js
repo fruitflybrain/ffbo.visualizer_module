@@ -676,6 +676,69 @@ FFBOMesh3D.prototype.hideAll = function() {
 			this.meshDict[key].object.visible = false;
 };
 
+FFBOMesh3D.prototype.export_state = function() {
+
+    state_metadata = {'color':{},'pin':{},'visible':{},'camera':{'position':{},'up':{}},'target':{}};
+    state_metadata['camera']['position']['x'] = this.camera.position.x;
+    state_metadata['camera']['position']['y'] = this.camera.position.y;
+    state_metadata['camera']['position']['z'] = this.camera.position.z;
+
+    state_metadata['camera']['up']['x'] = this.camera.up.x;
+    state_metadata['camera']['up']['y'] = this.camera.up.y;
+    state_metadata['camera']['up']['z'] = this.camera.up.z;
+
+    state_metadata['target']['x'] = this.controls.target.x;
+    state_metadata['target']['y'] = this.controls.target.y;
+    state_metadata['target']['z'] = this.controls.target.z;
+
+    state_metadata['pin'] = Array.from(this.pinned);
+    
+    for (var key in this.meshDict) {
+	if (this.meshDict.hasOwnProperty(key)) {
+	    state_metadata['color'][key] = this.meshDict[key].object.children[0].material.color.toArray();
+	    state_metadata['visible'][key] = this.meshDict[key].object.visible;
+	}
+    }
+    return state_metadata;
+}
+
+FFBOMesh3D.prototype.import_state = function(state_metadata) {
+    
+    this.camera.position.x = state_metadata['camera']['position']['x'];
+    this.camera.position.y = state_metadata['camera']['position']['y'];
+    this.camera.position.z = state_metadata['camera']['position']['z'];
+    
+    this.camera.up.x = state_metadata['camera']['up']['x'];
+    this.camera.up.y = state_metadata['camera']['up']['y'];
+    this.camera.up.z = state_metadata['camera']['up']['z'];
+    
+    this.controls.target.x = state_metadata['target']['x'];
+    this.controls.target.y = state_metadata['target']['y'];
+    this.controls.target.z = state_metadata['target']['z'];
+    
+    this.camera.lookAt(this.controls.target);
+    
+    this.pin(state_metadata['pin'])
+    
+    for (var key in state_metadata['color']) {
+	if (this.meshDict.hasOwnProperty(key)) {
+	    var meshobj = this.meshDict[key].object;
+	    var color = state_metadata['color'][key];
+	    for (var j = 0; j < meshobj.children.length; ++j ) {
+		meshobj.children[j].material.color.fromArray( color );
+		for(var k = 0; k < meshobj.children[j].geometry.colors.length; ++k){
+		    meshobj.children[j].geometry.colors[k].fromArray( color );
+		}
+		meshobj.children[j].geometry.colorsNeedUpdate = true;
+		
+	    }
+	    meshobj.visible = state_metadata['visible'][key];
+	}
+    }
+    
+    
+}
+
 FFBOMesh3D.prototype.show = function(id) {
 
 	id = this.asarray( id );
